@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Users</title>
+</head>
+<body>
+  <h1>All Users</h1>
+  <ul id="userList"></ul>
+
+  <script>
+    // 讀取 JSON 檔案並展示資料
+    fetch('all_user.json')
+      .then(response => response.json())
+      .then(data => {
+        const userList = document.getElementById('userList');
+
+        // 遍歷每個使用者，為其創建一個超連結
+        data.forEach(user => {
+          const listItem = document.createElement('li');
+          
+          // 創建超連結元素
+          const link = document.createElement('a');
+          link.href = `${user.name}.json`;  // 假設使用者的 JSON 檔案名稱是 name.json
+          link.textContent = `${user.name}:${user.id}`;  // 顯示格式 name:id
+
+          // 將超連結加入到列表項
+          listItem.appendChild(link);
+          userList.appendChild(listItem);
+        });
+      })
+      .catch(error => console.error('Error fetching user data:', error));
+  </script>
+</body>
+</html>
