@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <title>跑步紀錄</title>
+  <style>
+    body {
+      background-color: #111;
+      color: white;
+      font-family: "Noto Sans TC", sans-serif;
+      text-align: center;
+    }
+
+    #container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    canvas {
+      border-radius: 20px;
+      box-shadow: 0 0 10px #000;
+    }
+
+    .info-box {
+      background-color: #1c1c1c;
+      border-radius: 16px;
+      padding: 20px;
+      width: 320px;
+      margin-top: 15px;
+      text-align: left;
+    }
+
+    .info-box h2 {
+      margin: 0;
+      font-size: 2em;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 0.9em;
+      opacity: 0.8;
+    }
+
+    .highlight {
+      font-size: 1.4em;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container">
+    <canvas id="myCanvas" width="1000" height="600"></canvas>
+
+    <div class="info-box">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 id="distance">1.07 公里</h2>
+        <span>Yen-Chun Tsai</span>
+      </div>
+
+      <div class="info-row"><span>運動時間</span><span class="highlight" id="time">00:09:15</span></div>
+      <div class="info-row"><span>活動卡路里</span><span class="highlight" id="cal">51 kcal</span></div>
+      <div class="info-row"><span>平均配速</span><span class="highlight" id="pace">8'39"</span></div>
+      <div class="info-row"><span>步數</span><span class="highlight" id="steps">1225</span></div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('myCanvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.src = "https://i.ibb.co/DgzBj2gV/run.png"; // 換成你的背景圖
+
+    
+    ctx.lineWidth = 6;
+    ctx.strokeStyle = "#006000";
+
+    const a = 95;
+    const b = 180;
+    let startx = 555;
+    let starty = 195;
+    const turn = Math.PI / 5;
+    const delta = 2;
+    const sud_delta = 5;
+    const sud_delta_chance = 0.03;
+
+    let prevRandX = 0;
+    let prevRandY = 0;
+
+    img.onload = function () {
+      ctx.drawImage(img, 0, 0);
+      ctx.beginPath();
+
+      for (let i = 0; i <= 360 * 10; i++) {
+        let sudden_x = 0;
+        let sudden_y = 0;
+
+        const t = i / 180 * Math.PI;
+        const next_t = (i + 1) / 180 * Math.PI;
+
+        
+        prevRandX += (Math.random() - 0.5) * delta;
+        prevRandY += (Math.random() - 0.5) * delta;
+        prevRandX = Math.max(Math.min(prevRandX, 5), -5);
+        prevRandY = Math.max(Math.min(prevRandY, 5), -5);
+
+        
+        if (Math.random() < sud_delta_chance) {
+          sudden_x = (Math.random() - 0.5) * sud_delta;
+          sudden_y = (Math.random() - 0.5) * sud_delta;
+        }
+
+        
+        const x = a * Math.cos(t);
+        const y = b * Math.sin(t);
+        const nx = a * Math.cos(next_t);
+        const ny = b * Math.sin(next_t);
+
+        const rotatedX = x * Math.cos(turn) - y * Math.sin(turn);
+        const rotatedY = x * Math.sin(turn) + y * Math.cos(turn);
+        const rotatednX = nx * Math.cos(turn) - ny * Math.sin(turn);
+        const rotatednY = nx * Math.sin(turn) + ny * Math.cos(turn);
+
+        
+        const finalX = startx + (rotatednX - rotatedX) + sudden_x;
+        const finalY = starty + (rotatednY - rotatedY) + sudden_y;
+
+        if (i === 0) {
+          ctx.moveTo(finalX, finalY);
+        } else {
+          ctx.lineTo(finalX + prevRandX, finalY + prevRandY);
+          ctx.moveTo(finalX + prevRandX, finalY + prevRandY);
+          startx = finalX;
+          starty = finalY;
+        }
+      }
+
+      ctx.stroke();
+    };
+  </script>
+</body>
+</html>
