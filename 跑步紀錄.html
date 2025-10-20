@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>跑步紀錄</title>
+  <style>
+    body {
+      background-color: #111;
+      color: white;
+      font-family: "Noto Sans TC", sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    canvas {
+      width: 100%;
+      height: auto;
+      border-radius: 20px;
+      box-shadow: 0 0 10px #000;
+    }
+
+    .info-box {
+      background-color: #1c1c1c;
+      border-radius: 16px;
+      padding: 20px;
+      width: 90%;
+      max-width: 320px;
+      margin-top: 15px;
+      text-align: left;
+    }
+
+    .info-box h2 {
+      margin: 0;
+      font-size: 2em;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 0.9em;
+      opacity: 0.8;
+    }
+
+    .highlight {
+      font-size: 1.4em;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container">
+    <canvas id="myCanvas" width="1000" height="600"></canvas>
+
+    <div class="info-box">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 id="distance">1.07 公里</h2>
+        <span>Yen-Chun Tsai</span>
+      </div>
+
+      <div class="info-row"><span>運動時間</span><span class="highlight" id="time">00:09:15</span></div>
+      <div class="info-row"><span>活動卡路里</span><span class="highlight" id="cal">51 kcal</span></div>
+      <div class="info-row"><span>平均配速</span><span class="highlight" id="pace">8'39"</span></div>
+      <div class="info-row"><span>步數</span><span class="highlight" id="steps">1225</span></div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('myCanvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.src = "https://icon-bice.vercel.app/run.png"; // 背景圖
+
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = "#006000";
+
+    const a = 75;
+    const b = 150;
+    let startx = 545;
+    let starty = 205;
+    const turn = Math.PI / 4.5;
+    const delta = 2.8;
+    const sud_delta = 13;
+    const sud_delta_chance = 0.005;
+    const n = 2.55;
+    let prevRandX = 0;
+    let prevRandY = 0;
+
+    img.onload = function () {
+      ctx.drawImage(img, 0, 0);
+      ctx.beginPath();
+
+      let firstX = null, firstY = null;
+      let lastX = null, lastY = null;
+
+      for (let i = 0; i <= 360 * 5+Math.random()*720; i++) {
+        let sudden_x = 0;
+        let sudden_y = 0;
+
+        const t = i / 180 * Math.PI;
+        const next_t = (i + 1) / 180 * Math.PI;
+
+        prevRandX += (Math.random() - 0.5) * delta;
+        prevRandY += (Math.random() - 0.5) * delta;
+        prevRandX = Math.max(Math.min(prevRandX, 5), -5);
+        prevRandY = Math.max(Math.min(prevRandY, 5), -5);
+
+        if (Math.random() < sud_delta_chance) {
+          sudden_x = (Math.random() - 0.5) * sud_delta;
+          sudden_y = (Math.random() - 0.5) * sud_delta;
+        }
+
+        const x = a * Math.sign(Math.cos(t)) * Math.pow(Math.abs(Math.cos(t)), 2 / n);
+        const y = b * Math.sign(Math.sin(t)) * Math.pow(Math.abs(Math.sin(t)), 2 / n);
+        const nx = a * Math.sign(Math.cos(next_t)) * Math.pow(Math.abs(Math.cos(next_t)), 2 / n);
+        const ny = b * Math.sign(Math.sin(next_t)) * Math.pow(Math.abs(Math.sin(next_t)), 2 / n);
+
+        const rotatedX = x * Math.cos(turn) - y * Math.sin(turn);
+        const rotatedY = x * Math.sin(turn) + y * Math.cos(turn);
+        const rotatednX = nx * Math.cos(turn) - ny * Math.sin(turn);
+        const rotatednY = nx * Math.sin(turn) + ny * Math.cos(turn);
+
+        const finalX = startx + (rotatednX - rotatedX) + sudden_x;
+        const finalY = starty + (rotatednY - rotatedY) + sudden_y;
+
+        if (i === 0) {
+          ctx.moveTo(finalX, finalY);
+          firstX = finalX;
+          firstY = finalY;
+        } else {
+          ctx.lineTo(finalX + prevRandX, finalY + prevRandY);
+          startx = finalX;
+          starty = finalY;
+          lastX = finalX + prevRandX;
+          lastY = finalY + prevRandY;
+        }
+      }
+
+      ctx.stroke();
+
+      // 起點旗標
+      ctx.fillStyle = "#00ff00";
+      ctx.beginPath();
+      var rndx=(Math.random()-0.5)*80
+      var rndy=(Math.random()-0.5)*80
+      ctx.arc(firstX+rndx, firstY+rndy, 8, 0, 2 * Math.PI);
+      ctx.moveTo(firstX+rndx, firstY+rndy)
+      
+      ctx.fill();
+      
+      ctx.font = "bold 20px sans-serif";
+      
+      ctx.fillText("🏳️", firstX+rndx+10, firstY+rndy-10);
+      ctx.lineTo(firstX,firstY)
+      ctx.stroke()
+      // 終點旗標
+      ctx.fillStyle = "#ff4040";
+      ctx.beginPath();
+      
+      var ranx=Math.max((Math.random()-0.5)*80,35)
+      var rndy=Math.max((Math.random()-0.5)*80,35)
+      ctx.arc(lastX+rndx, lastY+rndy, 8, 0, 2 * Math.PI);
+      ctx.moveTo(lastX+rndx, lastY+rndy)
+      
+      ctx.fill();
+      
+      ctx.font = "bold 20px sans-serif";
+      ctx.fillText("🏴", lastX+rndx+10, lastY+rndy-10);
+      ctx.lineTo(lastX,lastY)
+      ctx.stroke()
+      
+    };
+  </script>
+</body>
+</html>
