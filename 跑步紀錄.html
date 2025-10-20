@@ -68,22 +68,53 @@
 
     <div class="info-box">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h2 id="distance">1.07 公里</h2>
-        <span>Yen-Chun Tsai</span>
+        <h2 id="distance">-- 公里</h2>
+        <span id="runner">--</span>
       </div>
 
-      <div class="info-row"><span>運動時間</span><span class="highlight" id="time">00:09:15</span></div>
-      <div class="info-row"><span>活動卡路里</span><span class="highlight" id="cal">51 kcal</span></div>
-      <div class="info-row"><span>平均配速</span><span class="highlight" id="pace">8'39"</span></div>
-      <div class="info-row"><span>步數</span><span class="highlight" id="steps">1225</span></div>
+      <div class="info-row"><span>運動時間</span><span class="highlight" id="time">--:--:--</span></div>
+      <div class="info-row"><span>活動卡路里</span><span class="highlight" id="cal">-- kcal</span></div>
+      <div class="info-row"><span>平均配速</span><span class="highlight" id="pace">--'--"</span></div>
+      <div class="info-row"><span>步數</span><span class="highlight" id="steps">--</span></div>
     </div>
   </div>
 
   <script>
+    // 解析網址參數
+    const urlParams = new URLSearchParams(window.location.search);
+    const name = urlParams.get('name') || 'Unknown';
+    const km = parseFloat(urlParams.get('km')) || 1;
+
+    // 配速（分鐘/公里）隨機 6~9
+    const pace = (Math.random() * 3 + 6).toFixed(2); 
+
+    // 總時間（分鐘）
+    const totalMin = (pace * km);
+    const totalSec = totalMin * 60;
+
+    const hh = String(Math.floor(totalSec / 3600)).padStart(2, '0');
+    const mm = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
+    const ss = String(Math.floor(totalSec % 60)).padStart(2, '0');
+
+    // 卡路里：大概 50~80 kcal/km
+    const cal = (km * (50 + Math.random() * 30)).toFixed(0);
+
+    // 步數：約 1150 步/公里
+    const steps = Math.round(km * (1100 + Math.random() * 150));
+
+    // 更新畫面
+    document.getElementById('runner').textContent = name;
+    document.getElementById('distance').textContent = km.toFixed(2) + " 公里";
+    document.getElementById('pace').textContent = `${Math.floor(pace)}'${String(Math.round((pace % 1) * 60)).padStart(2,'0')}"`;
+    document.getElementById('time').textContent = `${hh}:${mm}:${ss}`;
+    document.getElementById('cal').textContent = `${cal} kcal`;
+    document.getElementById('steps').textContent = steps;
+
+    // === 繪圖部分 ===
     const canvas = document.getElementById('myCanvas');
     const ctx = canvas.getContext('2d');
     const img = new Image();
-    img.src = "https://icon-bice.vercel.app/run.png"; // 背景圖
+    img.src = "https://icon-bice.vercel.app/run.png";
 
     ctx.lineWidth = 5;
     ctx.strokeStyle = "#006000";
@@ -106,83 +137,69 @@
 
       let firstX = null, firstY = null;
       let lastX = null, lastY = null;
+      const loops = Math.round(km); // 每公里畫一圈
 
-      for (let i = 0; i <= 360 * 5+Math.random()*720; i++) {
-        let sudden_x = 0;
-        let sudden_y = 0;
+      for (let lap = 0; lap < loops; lap++) {
+        for (let i = 0; i <= 360; i++) {
+          let sudden_x = 0;
+          let sudden_y = 0;
 
-        const t = i / 180 * Math.PI;
-        const next_t = (i + 1) / 180 * Math.PI;
+          const t = i / 180 * Math.PI;
+          const next_t = (i + 1) / 180 * Math.PI;
 
-        prevRandX += (Math.random() - 0.5) * delta;
-        prevRandY += (Math.random() - 0.5) * delta;
-        prevRandX = Math.max(Math.min(prevRandX, 5), -5);
-        prevRandY = Math.max(Math.min(prevRandY, 5), -5);
+          prevRandX += (Math.random() - 0.5) * delta;
+          prevRandY += (Math.random() - 0.5) * delta;
+          prevRandX = Math.max(Math.min(prevRandX, 5), -5);
+          prevRandY = Math.max(Math.min(prevRandY, 5), -5);
 
-        if (Math.random() < sud_delta_chance) {
-          sudden_x = (Math.random() - 0.5) * sud_delta;
-          sudden_y = (Math.random() - 0.5) * sud_delta;
-        }
+          if (Math.random() < sud_delta_chance) {
+            sudden_x = (Math.random() - 0.5) * sud_delta;
+            sudden_y = (Math.random() - 0.5) * sud_delta;
+          }
 
-        const x = a * Math.sign(Math.cos(t)) * Math.pow(Math.abs(Math.cos(t)), 2 / n);
-        const y = b * Math.sign(Math.sin(t)) * Math.pow(Math.abs(Math.sin(t)), 2 / n);
-        const nx = a * Math.sign(Math.cos(next_t)) * Math.pow(Math.abs(Math.cos(next_t)), 2 / n);
-        const ny = b * Math.sign(Math.sin(next_t)) * Math.pow(Math.abs(Math.sin(next_t)), 2 / n);
+          const x = a * Math.sign(Math.cos(t)) * Math.pow(Math.abs(Math.cos(t)), 2 / n);
+          const y = b * Math.sign(Math.sin(t)) * Math.pow(Math.abs(Math.sin(t)), 2 / n);
+          const nx = a * Math.sign(Math.cos(next_t)) * Math.pow(Math.abs(Math.cos(next_t)), 2 / n);
+          const ny = b * Math.sign(Math.sin(next_t)) * Math.pow(Math.abs(Math.sin(next_t)), 2 / n);
 
-        const rotatedX = x * Math.cos(turn) - y * Math.sin(turn);
-        const rotatedY = x * Math.sin(turn) + y * Math.cos(turn);
-        const rotatednX = nx * Math.cos(turn) - ny * Math.sin(turn);
-        const rotatednY = nx * Math.sin(turn) + ny * Math.cos(turn);
+          const rotatedX = x * Math.cos(turn) - y * Math.sin(turn);
+          const rotatedY = x * Math.sin(turn) + y * Math.cos(turn);
+          const rotatednX = nx * Math.cos(turn) - ny * Math.sin(turn);
+          const rotatednY = nx * Math.sin(turn) + ny * Math.cos(turn);
 
-        const finalX = startx + (rotatednX - rotatedX) + sudden_x;
-        const finalY = starty + (rotatednY - rotatedY) + sudden_y;
+          const finalX = startx + (rotatednX - rotatedX) + sudden_x;
+          const finalY = starty + (rotatednY - rotatedY) + sudden_y;
 
-        if (i === 0) {
-          ctx.moveTo(finalX, finalY);
-          firstX = finalX;
-          firstY = finalY;
-        } else {
-          ctx.lineTo(finalX + prevRandX, finalY + prevRandY);
-          startx = finalX;
-          starty = finalY;
-          lastX = finalX + prevRandX;
-          lastY = finalY + prevRandY;
+          if (lap === 0 && i === 0) {
+            ctx.moveTo(finalX, finalY);
+            firstX = finalX;
+            firstY = finalY;
+          } else {
+            ctx.lineTo(finalX + prevRandX, finalY + prevRandY);
+            startx = finalX;
+            starty = finalY;
+            lastX = finalX + prevRandX;
+            lastY = finalY + prevRandY;
+          }
         }
       }
 
       ctx.stroke();
 
-      // 起點旗標
+      // 起點
       ctx.fillStyle = "#00ff00";
       ctx.beginPath();
-      var rndx=(Math.random()-0.5)*80
-      var rndy=(Math.random()-0.5)*80
-      ctx.arc(firstX+rndx, firstY+rndy, 8, 0, 2 * Math.PI);
-      ctx.moveTo(firstX+rndx, firstY+rndy)
-      
+      ctx.arc(firstX, firstY, 8, 0, 2 * Math.PI);
       ctx.fill();
-      
       ctx.font = "bold 20px sans-serif";
-      
-      ctx.fillText("🏳️", firstX+rndx+10, firstY+rndy-10);
-      ctx.lineTo(firstX,firstY)
-      ctx.stroke()
-      // 終點旗標
+      ctx.fillText("🏁", firstX + 12, firstY - 8);
+
+      // 終點
       ctx.fillStyle = "#ff4040";
       ctx.beginPath();
-      
-      var ranx=Math.max((Math.random()-0.5)*80,35)
-      var rndy=Math.max((Math.random()-0.5)*80,35)
-      ctx.arc(lastX+rndx, lastY+rndy, 8, 0, 2 * Math.PI);
-      ctx.moveTo(lastX+rndx, lastY+rndy)
-      
+      ctx.arc(lastX, lastY, 8, 0, 2 * Math.PI);
       ctx.fill();
-      
-      ctx.font = "bold 20px sans-serif";
-      ctx.fillText("🏴", lastX+rndx+10, lastY+rndy-10);
-      ctx.lineTo(lastX,lastY)
-      ctx.stroke()
-      
+      ctx.fillText("🏴", lastX + 12, lastY - 8);
     };
   </script>
 </body>
