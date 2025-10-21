@@ -1,0 +1,24 @@
+{
+  "map_settings": {
+    "a": 60,
+    "b": 100,
+    "turn_degree": 41,
+    "n": 2.55,
+    "startx": 245,
+    "starty": 165
+  },
+  "randomness": {
+    "delta": 1.8,
+    "max_rand": 3.0,
+    "sud_delta": 20,
+    "sud_delta_chance": 0.0013
+  },
+  "data_ranges": {
+    "pace_min": 8.1,
+    "pace_max": 8.5,
+    "cal_base": 55,
+    "cal_range": 10,
+    "steps_base": 1200,
+    "steps_range": 150
+  }
+}
