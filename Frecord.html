@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>跑步紀錄模擬器</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #121212;
+      color: #ffffff;
+      font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding-top: 0px;
+      padding-bottom: 50px;
+    }
+   .bc{
+    display:flex;
+    width:100%;
+    height:100px;
+    align-items:left;
+    justify-content: left;
+   };
+
+ .brand {
+  
+   font-family: 'Montserrat', sans-serif;
+  	
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 2px;
+  top:0px;
+  left:0px;
+  margin-right: auto;
+  
+  background-color: #F57C00;
+  color: #ffffff;
+  display: flex;             /* 啟用 flex 排版 */
+  align-items: center;       /* 垂直置中 */
+  justify-content: center 
+  width=23%
+  height:40px;
+  padding: 7px 24px;
+  border-radius: 10px;
+  letter-spacing: 2px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 1000;
+}
+
+.brand:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+}
+
+    #app-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 90%;
+      max-width: 450px;
+    }
+
+    #myCanvas {
+      width: 100%;
+      height: auto;
+      border-radius: 16px;
+      margin-bottom: 25px;
+      background-color: #1e1e1e;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    .run-info-card {
+      position: fixed;
+      top:340px;
+      
+
+      background-color: #1e1e1e;
+      border-radius: 20px;
+      padding: 30px 25px;
+      width:75%;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      margin-bottom: 30px;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .run-info-card:hover {
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .header-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 25px;
+    }
+
+    #distance {
+      font-size: 3.5em;
+      font-weight: 700;
+      line-height: 1;
+      color: #4CAF50;
+    }
+
+    #distance small {
+      font-size: 0.4em;
+      font-weight: 300;
+      opacity: 0.8;
+      display: block;
+      margin-top: 5px;
+    }
+
+    #runner {
+      font-size: 1.2em;
+      font-weight: 500;
+      opacity: 0.9;
+      padding: 5px 10px;
+      background: #333;
+      border-radius: 10px;
+    }
+
+    .data-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 25px;
+      text-align: left;
+    }
+
+    .data-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .data-label {
+      font-size: 0.9em;
+      color: #aaa;
+      margin-bottom: 4px;
+    }
+
+    .data-value {
+      font-size: 1.5em;
+      font-weight: 600;
+    }
+
+    .action-buttons {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+
+    .action-btn, .saction-btn {
+      background-color: #2A2A2A;
+      border: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transition: transform 0.2s ease, background-color 0.2s ease;
+      cursor: pointer;
+    }
+
+    .action-btn:hover, .saction-btn:hover {
+      background-color: #3A3A3A;
+      transform: scale(1.1);
+    }
+
+    .action-btn {
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      padding: 10px;
+    }
+
+    .saction-btn {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      padding: 12px;
+    }
+  </style>
+</head>
+
+<body>
+
+  
+  
+  <div id="app-container">
+    <canvas id="myCanvas" width="400" height="400"></canvas>
+    <div class="run-info-card">
+      <div class="header-section">
+        <div>
+          <span id="distance">--</span>
+          <small>公里</small>
+        </div>
+        <span id="runner">--</span>
+      </div>
+     <div class="data-grid">
+      <div class="data-item"><span class="data-label">日期</span><span class="data-value" id="date">--/--</span></div>
+        <div class="data-item"><span class="data-label">運動時間</span><span class="data-value" id="time">--:--:--</span></div>
+        <div class="data-item"><span class="data-label">平均配速</span><span class="data-value" id="pace">--'--"</span></div>
+        <div class="data-item"><span class="data-label">活動卡路里</span><span class="data-value" id="cal">-- kcal</span></div>
+        <div class="data-item"><span class="data-label">步數</span><span class="data-value" id="steps">--</span></div>
+      </div>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <img src="https://icon-bice.vercel.app/34_20251021140033.png" class="action-btn" alt="pause">
+      <img class="saction-btn" src="https://icon-bice.vercel.app/33_20251021135949.png" alt="play">
+      <img src="https://icon-bice.vercel.app/32_20251021135759.png" class="action-btn" alt="share">
+    </div>
+  </div>
+  <script>
+const today = new Date();
+  const formattedDate = `${today.getFullYear()}/${today.getMonth() + 1}/${today.getDate()}`;
+  document.getElementById("date").textContent = formattedDate;
+    async function loadSettings() {
+      try {
+        const response = await fetch('/C:/Users/OPAC/Downloads/setting.json');
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return await response.json();
+      } catch (e) {
+        return {
+          map_settings: { a: 60, b: 100, turn_degree: 41, n: 2.55, startx: 245, starty: 165 },
+          randomness: { delta: 0.32, max_rand: 5, sud_delta: 13, sud_delta_chance: 0.0013 },
+          data_ranges: { pace_min: 6, pace_max: 9, cal_base: 50, cal_range: 30, steps_base: 1100, steps_range: 150 }
+        };
+      }
+    }
+
+    async function init() {
+      const settings = await loadSettings();
+      const urlParams = new URLSearchParams(window.location.search);
+      const name = urlParams.get('name') || '跑者';
+      const km = parseFloat(urlParams.get('km')) || 1;
+      const { pace_min, pace_max, cal_base, cal_range, steps_base, steps_range } = settings.data_ranges;
+      const pace = (Math.random() * (pace_max - pace_min) + pace_min).toFixed(2);
+      const totalMin = pace * km;
+      const totalSec = totalMin * 60;
+      const hh = String(Math.floor(totalSec / 3600)).padStart(2, '0');
+      const mm = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
+      const ss = String(Math.floor(totalSec % 60)).padStart(2, '0');
+      const cal = (km * (cal_base + Math.random() * cal_range)).toFixed(0);
+      const steps = Math.round(km * (steps_base + Math.random() * steps_range));
+      document.getElementById('runner').textContent = name;
+      document.getElementById('distance').textContent = km.toFixed(2); 
+      document.getElementById('pace').textContent = `${Math.floor(pace)}'${String(Math.round((pace % 1) * 60)).padStart(2,'0')}"`;
+      document.getElementById('time').textContent = `${hh}:${mm}:${ss}`;
+      document.getElementById('cal').textContent = `${cal} kcal`;
+      document.getElementById('steps').textContent = steps;
+
+      const canvas = document.getElementById('myCanvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      img.src = "https://icon-bice.vercel.app/run.png"; 
+      ctx.lineWidth = 7;
+      ctx.strokeStyle = "#4CAF50";
+      const { a, b, turn_degree, n } = settings.map_settings;
+      let { startx, starty } = settings.map_settings;
+      const turn = turn_degree * Math.PI / 180;
+      const { delta, max_rand, sud_delta, sud_delta_chance } = settings.randomness;
+      let dx = 0, dy = 0;
+      let lastX = null, lastY = null;
+      let firstX = null, firstY = null;
+
+      img.onload = function () {
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        ctx.beginPath();
+        const loops = Math.round(km);
+        for (let lap = 0; lap < loops; lap++) {
+          for (let i = 0; i <= 360*2; i++) {
+            const t = i / (180*2) * Math.PI;
+            const next_t = (i + 1) / (180*2) * Math.PI;
+            const randX = (Math.random() - 0.5) * delta;
+            const randY = (Math.random() - 0.5) * delta;
+            dx = (dx + randX) * 0.8;
+            dy = (dy + randY) * 0.8;
+            let sudden_x = 0, sudden_y = 0;
+            if (Math.random() < sud_delta_chance) {
+              sudden_x = (Math.random() - 0.5) * sud_delta;
+              sudden_y = (Math.random() - 0.5) * sud_delta;
+            }
+
+            const x = a * Math.sign(Math.cos(t)) * Math.pow(Math.abs(Math.cos(t)), 2 / n);
+            const y = b * Math.sign(Math.sin(t)) * Math.pow(Math.abs(Math.sin(t)), 2 / n);
+            const nx = a * Math.sign(Math.cos(next_t)) * Math.pow(Math.abs(Math.cos(next_t)), 2 / n);
+            const ny = b * Math.sign(Math.sin(next_t)) * Math.pow(Math.abs(Math.sin(next_t)), 2 / n);
+            const rotatedX = x * Math.cos(turn) - y * Math.sin(turn);
+            const rotatedY = x * Math.sin(turn) + y * Math.cos(turn);
+            const rotatednX = nx * Math.cos(turn) - ny * Math.sin(turn);
+            const rotatednY = nx * Math.sin(turn) + ny * Math.cos(turn);
+            const finalX = startx + (rotatednX - rotatedX) + dx + sudden_x;
+            const finalY = starty + (rotatednY - rotatedY) + dy + sudden_y;
+
+            if (lap === 0 && i === 0) {
+              ctx.moveTo(finalX, finalY);
+              firstX = finalX;
+              firstY = finalY;
+            } else {
+              ctx.lineTo(finalX, finalY);
+              startx = finalX;
+              starty = finalY;
+              lastX = finalX;
+              lastY = finalY;
+            }
+          }
+        }
+        ctx.stroke();
+        const size = 24;
+        const endImg = new Image();
+        endImg.src = "https://icon-bice.vercel.app/placeholder.png";
+        endImg.onload = () => { if (lastX && lastY) ctx.drawImage(endImg, lastX - size/2, lastY - size/2, size, size); };
+        const startImg = new Image();
+        startImg.src = "https://icon-bice.vercel.app/placeholder_1.png";
+        startImg.onload = () => { if (firstX && firstY) ctx.drawImage(startImg, firstX - size/2, firstY - size/2, size, size); };
+      };
+    }
+    init(); 
+  </script>
+</body>
+</html>
