@@ -3,195 +3,84 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>跑步紀錄</title>
+  <title>跑步紀錄模擬器</title>
   <style>
-    /* 使用圖片中的深色背景和字體 */
     body {
-      background-color: #121212; /* 更深的背景色 */
-      color: #ffffff;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background-color: #111;
+      color: white;
+      font-family: "Noto Sans TC", sans-serif;
       text-align: center;
       margin: 0;
       padding: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
-      /* 移除垂直居中，讓內容可以從頂部開始，以容納更多元素 */
-      min-height: 100vh;
-      padding-top: 20px;
-      padding-bottom: 50px; 
     }
 
-    #app-container {
+    #container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      width: 90%;
-      max-width: 450px; /* 限制最大寬度，使其看起來像手機應用 */
+      width: 100%;
+      max-width: 1000px;
     }
 
-    /* 地圖畫布區塊的樣式 */
-    #myCanvas {
+    canvas {
       width: 100%;
       height: auto;
-      border-radius: 16px; /* 圓角 */
-      margin-bottom: 25px;
-      /* 讓畫布融入深色背景 */
-      background-color: #1e1e1e; 
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-    }
-    
-    /* 頂部跑步資訊區塊 (模仿圖片中的主要卡片) */
-    .run-info-card {
-      background-color: #1e1e1e; /* 卡片背景色 */
       border-radius: 20px;
-      padding: 30px 20px;
-      width: 100%;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-      margin-bottom: 30px;
+      box-shadow: 0 0 10px #000;
     }
 
-    /* 頂部使用者和距離 */
-    .header-section {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 25px;
-    }
-
-    #distance {
-      font-size: 3.5em; /* 距離字體最大 */
-      font-weight: 700;
-      line-height: 1;
-      color: #4CAF50; /* 綠色高亮 */
-    }
-
-    #distance small {
-      font-size: 0.4em;
-      font-weight: 300;
-      opacity: 0.8;
-      display: block;
-      margin-top: 5px;
-    }
-
-    #runner {
-      font-size: 1.2em;
-      font-weight: 500;
-      opacity: 0.9;
-      padding: 5px 10px;
-      background: #333;
-      border-radius: 10px;
-    }
-
-    /* 主要數據網格 */
-    .data-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr); /* 兩欄佈局 */
-      gap: 25px;
+    .info-box {
+      background-color: #1c1c1c;
+      border-radius: 16px;
+      padding: 20px;
+      width: 90%;
+      max-width: 320px;
+      margin-top: 15px;
       text-align: left;
     }
 
-    .data-item {
-      display: flex;
-      flex-direction: column;
+    .info-box h2 {
+      margin: 0;
+      font-size: 2em;
     }
 
-    .data-label {
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
       font-size: 0.9em;
-      color: #aaa; /* 標籤顏色較淡 */
-      margin-bottom: 4px;
+      opacity: 0.8;
     }
 
-    .data-value {
-      font-size: 1.5em; /* 數值字體大小 */
-      font-weight: 600;
+    .highlight {
+      font-size: 1.4em;
+      font-weight: bold;
     }
-
-    /* 動作按鈕區塊 (模仿圖片中的三個圓形按鈕) */
-    .action-buttons {
-      display: flex;
-      justify-content: space-around;
-      width: 100%;
-      margin-top: 20px;
-    }
-
-    .action-btn {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background-color: #333;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.8em;
-      font-weight: 900;
-      border: 3px solid #555;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-
-    .action-btn:hover {
-      background-color: #444;
-    }
-    
-    /* 讓畫布上的文字更清晰 (終點標誌) */
-    #myCanvas + script + div {
-        text-align: left;
-    }
-
   </style>
 </head>
 
 <body>
-  <div id="app-container">
+  <div id="container">
+    <canvas id="myCanvas" width="1000" height="600"></canvas>
 
-    <canvas id="myCanvas" width="400" height="400"></canvas>
-    
-    <div class="run-info-card">
-      
-      <div class="header-section">
-        <div>
-          <span id="distance">--</span>
-          <small>公里</small>
-        </div>
+    <div class="info-box">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 id="distance">-- 公里</h2>
         <span id="runner">--</span>
       </div>
 
-      <div class="data-grid">
-        
-        <div class="data-item">
-          <span class="data-label">運動時間</span>
-          <span class="data-value" id="time">--:--:--</span>
-        </div>
-        
-        <div class="data-item">
-          <span class="data-label">平均配速</span>
-          <span class="data-value" id="pace">--'--"</span> 
-        </div>
-
-        <div class="data-item">
-          <span class="data-label">活動卡路里</span>
-          <span class="data-value" id="cal">-- kcal</span>
-        </div>
-        
-        <div class="data-item">
-          <span class="data-label">步數</span>
-          <span class="data-value" id="steps">--</span>
-        </div>
-
-      </div>
-    </div>
-    
-    <div class="action-buttons">
-	    <img class="action-btn" src="https://icon-bice.vercel.app/34_20251021140033.png">
-      <img class="action-btn" src="https://icon-bice.vercel.app/33_20251021135949.png">
-      <img class="action-btn" src="https://icon-bice.vercel.app/32_20251021135759.png">
+      <div class="info-row"><span>運動時間</span><span class="highlight" id="time">--:--:--</span></div>
+      <div class="info-row"><span>活動卡路里</span><span class="highlight" id="cal">-- kcal</span></div>
+      <div class="info-row"><span>平均配速</span><span class="highlight" id="pace">--'--"</span></div>
+      <div class="info-row"><span>步數</span><span class="highlight" id="steps">--</span></div>
     </div>
   </div>
 
   <script>
-    // --- 載入設定檔 (保持不變) ---
+    // --- 載入設定檔 ---
     async function loadSettings() {
       try {
         const response = await fetch('setting.json');
@@ -203,57 +92,64 @@
         console.error("無法載入 setting.json，請確認檔案是否存在且路徑正確。", e);
         // 提供一個硬編碼的預設值作為備用
         return {
-          map_settings: { a: 75, b: 150, turn_degree: 45, n: 2.55, startx: 200, starty: 200 }, // 調整起點到新的 400x400 中心
+          map_settings: { a: 75, b: 150, turn_degree: 45, n: 2.55, startx: 545, starty: 205 },
           randomness: { delta: 2.8, max_rand: 5, sud_delta: 13, sud_delta_chance: 0.005 },
           data_ranges: { pace_min: 6, pace_max: 9, cal_base: 50, cal_range: 30, steps_base: 1100, steps_range: 150 }
         };
       }
     }
 
-    // --- 主程式碼 (整合了數據更新和繪圖) ---
+    // --- 主程式碼 ---
     async function init() {
       const settings = await loadSettings();
 
       // 解析網址參數
       const urlParams = new URLSearchParams(window.location.search);
-      const name = urlParams.get('name') || '跑者';
+      const name = urlParams.get('name') || 'Unknown';
       const km = parseFloat(urlParams.get('km')) || 1;
 
       // 取得數據範圍設定
       const { pace_min, pace_max, cal_base, cal_range, steps_base, steps_range } = settings.data_ranges;
 
       // 計算數據
+      // 配速（分鐘/公里）隨機
       const pace = (Math.random() * (pace_max - pace_min) + pace_min).toFixed(2); 
+
+      // 總時間（分鐘）
       const totalMin = (pace * km);
       const totalSec = totalMin * 60;
+
       const hh = String(Math.floor(totalSec / 3600)).padStart(2, '0');
       const mm = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
       const ss = String(Math.floor(totalSec % 60)).padStart(2, '0');
+
+      // 卡路里：base +/- range
       const cal = (km * (cal_base + Math.random() * cal_range)).toFixed(0);
+
+      // 步數：base +/- range
       const steps = Math.round(km * (steps_base + Math.random() * steps_range));
 
-      // 更新畫面 (新的 UI 結構)
+      // 更新畫面
       document.getElementById('runner').textContent = name;
-      document.getElementById('distance').textContent = km.toFixed(2); 
+      document.getElementById('distance').textContent = km.toFixed(2) + " 公里";
       document.getElementById('pace').textContent = `${Math.floor(pace)}'${String(Math.round((pace % 1) * 60)).padStart(2,'0')}"`;
       document.getElementById('time').textContent = `${hh}:${mm}:${ss}`;
       document.getElementById('cal').textContent = `${cal} kcal`;
       document.getElementById('steps').textContent = steps;
 
-      // === 繪圖部分 (維持原始邏輯，僅加入起終點標註) ===
+      // === 繪圖部分 ===
       const canvas = document.getElementById('myCanvas');
       const ctx = canvas.getContext('2d');
       const img = new Image();
-      // 使用背景圖作為地圖基底
+      // 注意：這是一個外部圖片，用於模擬地圖背景。如果無法載入，繪圖區域會是空白。
       img.src = "https://icon-bice.vercel.app/run.png"; 
 
-      // 繪圖設定 (使用深色 UI 友善的顏色)
-      ctx.lineWidth = 5;
-      ctx.strokeStyle = "#467500"; // 使用綠色線條，與距離高亮色一致
-      
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = "#006000";
+
       // 從設定檔讀取繪圖參數
       const { a, b, turn_degree, n } = settings.map_settings;
-      let { startx, starty } = settings.map_settings; // 維持原始 bug 邏輯，在迴圈中會被修改
+      let { startx, starty } = settings.map_settings;
       
       const turn = turn_degree * Math.PI / 180; // 角度轉弧度
       
@@ -264,27 +160,25 @@
       let prevRandY = 0;
 
       img.onload = function () {
-        // 先繪製背景地圖圖案
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height); // 確保圖案能填滿新的 400x400 畫布
-
+        ctx.drawImage(img, 0, 0);
         ctx.beginPath();
 
         let firstX = null, firstY = null;
-        let lastX = null, lastY = null; // *** 新增：用於記錄終點座標 ***
-        const loops = Math.round(km); 
+        let lastX = null, lastY = null;
+        const loops = Math.round(km); // 每公里畫一圈
 
         for (let lap = 0; lap < loops; lap++) {
-          for (let i = 0; i <= 360*2; i++) {
+          for (let i = 0; i <= 360; i++) {
             let sudden_x = 0;
             let sudden_y = 0;
 
-            const t = i / (180*2) * Math.PI;
-            const next_t = (i + 1) / (180*2) * Math.PI;
+            const t = i / 180 * Math.PI;
+            const next_t = (i + 1) / 180 * Math.PI;
 
             // 隨機偏移
             prevRandX += (Math.random() - 0.5) * delta;
             prevRandY += (Math.random() - 0.5) * delta;
-            prevRandX = Math.max(Math.min(prevRandX, max_rand), -max_rand);
+            prevRandX = Math.max(Math.min(prevRandX, max_rand), -max_rand); // 限制最大偏移量
             prevRandY = Math.max(Math.min(prevRandY, max_rand), -max_rand);
 
             // 突然的大偏移
@@ -314,43 +208,30 @@
               firstY = finalY;
             } else {
               ctx.lineTo(finalX + prevRandX, finalY + prevRandY);
-              startx = finalX; // *** 原始 Bug 邏輯保留 ***
-              starty = finalY; // *** 原始 Bug 邏輯保留 ***
-              if (Math.random() < 0.013) {
-               // 新增：記錄終點座標
-               lastX = finalX + prevRandX;
-               lastY = finalY + prevRandY;
-           }      
-	   } 
+              startx = finalX;
+              starty = finalY;
+              lastX = finalX + prevRandX;
+              lastY = finalY + prevRandY;
+            }
           }
         }
 
-        ctx.stroke(); 
-        // 在右下角顯示日期
-        const date = new Date().toLocaleDateString("zh-TW");
-       ctx.font = "16px sans-serif";
-       ctx.fillStyle = "black";
-       ctx.textAlign = "right";
-       ctx.fillText(date, canvas.width - 10, canvas.height - 10);
-        const size = 24; // icon 大小
-        
-        // 1. 繪製終點圖標 (使用 placeholder.png)
-        const endImg = new Image();
-        endImg.src = "https://icon-bice.vercel.app/placeholder.png"; // *** 終點圖標 ***
-        endImg.onload = () => {
-          if (lastX !== null && lastY !== null) {
-            ctx.drawImage(endImg, lastX - size / 2, lastY - size / 2, size, size);
-          }
-        };
+        ctx.stroke();
 
-        // 2. 繪製起點圖標 (使用 placeholder_1.png)
-        const startImg = new Image();
-        startImg.src = "https://icon-bice.vercel.app/placeholder_1.png"; // *** 起點圖標 (依據您的要求) ***
-        startImg.onload = () => {
-          if (firstX !== null && firstY !== null) {
-            ctx.drawImage(startImg, firstX - size / 2, firstY - size / 2, size, size);
-          }
-        }; 
+        // 起點 (綠點)
+        ctx.fillStyle = "#00ff00";
+        ctx.beginPath();
+        ctx.arc(firstX, firstY, 8, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.font = "bold 20px sans-serif";
+        
+
+        // 終點 (紅點)
+        ctx.fillStyle = "#ff4040";
+        ctx.beginPath();
+        ctx.arc(lastX, lastY, 8, 0, 2 * Math.PI);
+        ctx.fill();
+        
       };
     }
     
